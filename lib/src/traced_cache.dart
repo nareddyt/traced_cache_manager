@@ -3,13 +3,17 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:traced_cache_manager/src/traced_file_service.dart';
 
-/// The TracedCacheManager that can be easily used directly.
-/// This supports tracing network calls using Firebase Performance Monitoring.
+/// The [TracedCacheManager] provides a default implementation of a [BaseCacheManager]
+/// that automatically traces network calls and publishes the traces to Firebase
+/// Performance Monitoring.
 class TracedCacheManager extends BaseCacheManager {
-  static const key = 'libCachedImageData';
+  // Note this uses a different key than the [DefaultCacheManager],
+  // forcing data to be re-downloaded on the first use.
+  static const key = 'libTracedCachedImageData';
 
   static TracedCacheManager _instance;
 
+  /// Returns the singleton instance of the [TracedCacheManager].
   factory TracedCacheManager() {
     _instance ??= TracedCacheManager._();
     return _instance;
