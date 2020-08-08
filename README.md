@@ -1,8 +1,10 @@
 # `traced_cache_manager`
 
-[CacheManager](https://pub.dev/packages/flutter_cache_manager) implementation that integrates with 
+[Cache Manager](https://pub.dev/packages/flutter_cache_manager) implementation that integrates with 
 [Firebase Performance Monitoring](https://firebase.google.com/docs/perf-mon) to automatically 
 record traces for network requests.
+
+![](docs/firebase_perf_console_trace.png "Firebase Performance Console with a automatically collected network trace")
 
 ## Background
 
@@ -13,11 +15,11 @@ However, the plugin does not automatically collect traces for **all** network re
 
 One popular unsupported widget is [`cached_network_image`](https://pub.dev/packages/cached_network_image),
 a flutter library to show images from the internet and keep them in the cache directory. Under the hood,
-this widget uses [`flutter_cache_manager`](https://pub.dev/packages/flutter_cache_manager) library to 
+this widget uses [`flutter_cache_manager`](https://pub.dev/packages/flutter_cache_manager) to 
 download and cache files in the cache directory of the app. When a cache miss occurs, the network
-request made to download the file is not automatically traced.
+request to download the file is not automatically traced with Firebase Performance flutter plugin.
 
-This package (traced_cache_manager) provides a custom CacheManager implementation that automatically
+This package (`traced_cache_manager`) provides a custom Cache Manager implementation that automatically
 traces network requests and publishes them to Firebase Performance Monitoring. It can be used with
 [`cached_network_image`](https://pub.dev/packages/cached_network_image) to automatically trace network
 requests when downloading images from the internet.
@@ -25,12 +27,12 @@ requests when downloading images from the internet.
 ## Setup
 
 1. Add the Firebase Performance [flutter plugin](https://pub.dev/packages/firebase_performance) to your app.
-Follow the setup instructions to integrate with Firebase Performance Monitoring.
+Follow the setup instructions in that package to integrate with Firebase Performance Monitoring.
 2. [Install](https://pub.dev/packages/traced_cache_manager/install) this package.
 
 ## Usage
 
-There are 3 use cases for this custom cache implementation, listed from most popular to least.
+There are 3 use cases for this custom cache implementation.
 
 ### With `cached_network_image`
 
@@ -38,6 +40,7 @@ Automatically trace all network requests made by the `CachedNetworkImage` widget
 
 ```flutter
 CachedNetworkImage(
+  imageUrl: 'https://picsum.photos/500',
   ...
   cacheManager: TracedCacheManager(),
 )

@@ -9,8 +9,9 @@ import 'package:traced_cache_manager/src/traced_file_service.dart';
 class TracedCacheManager extends BaseCacheManager {
   // Note this uses a different key than the [DefaultCacheManager],
   // forcing data to be re-downloaded on the first use.
-  static const key = 'libTracedCachedImageData';
+  static const _key = 'libTracedCachedImageData';
 
+  // The singleton instance.
   static TracedCacheManager _instance;
 
   /// Returns the singleton instance of the [TracedCacheManager].
@@ -19,11 +20,11 @@ class TracedCacheManager extends BaseCacheManager {
     return _instance;
   }
 
-  TracedCacheManager._() : super(key, fileService: TracedHttpFileService());
+  TracedCacheManager._() : super(_key, fileService: TracedHttpFileService());
 
   @override
   Future<String> getFilePath() async {
     var directory = await getTemporaryDirectory();
-    return p.join(directory.path, key);
+    return p.join(directory.path, _key);
   }
 }
