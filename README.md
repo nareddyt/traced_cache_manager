@@ -1,4 +1,4 @@
-# `traced_cache_manager`
+# traced\_cache\_manager
 
 [Cache Manager](https://pub.dev/packages/flutter_cache_manager) implementation that integrates with 
 [Firebase Performance Monitoring](https://firebase.google.com/docs/perf-mon) to automatically 
@@ -34,7 +34,7 @@ Follow the setup instructions in that package to integrate with Firebase Perform
 
 There are 3 use cases for this custom cache implementation.
 
-### With `cached_network_image`
+### With cached\_network\_image
 
 Automatically trace all network requests made by the `CachedNetworkImage` widget.
 
@@ -56,7 +56,7 @@ Future<File> fetchFile(String uri) async {
 }
 ```
 
-### In a custom `Cache Manager` implementation
+### In a custom Cache Manager implementation
 
 If you are writing a custom cache implementation and want automatic tracing of network requests,
 you can use `TracedHttpFileService` as an argument to the `BaseCacheManager`.
