@@ -1,6 +1,6 @@
 name: traced_cache_manager
 description: CacheManager implementation that integrates with Firebase Performance Monitoring to automatically record traces for network requests.
-version: 1.0.0
+version: 1.0.1
 homepage: https://pub.dev/packages/traced_cache_manager
 repository: https://github.com/nareddyt/traced_cache_manager
 issue_tracker: https://github.com/nareddyt/traced_cache_manager/issues
