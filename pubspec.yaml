@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  http: ^0.12.2
   path: ^1.7.0
   path_provider: ^1.6.11
   flutter_cache_manager: ^1.4.1

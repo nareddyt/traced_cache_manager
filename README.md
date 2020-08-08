@@ -4,7 +4,7 @@
 [Firebase Performance Monitoring](https://firebase.google.com/docs/perf-mon) to automatically 
 record traces for network requests.
 
-![](docs/firebase_perf_console_trace.png "Firebase Performance Console with a automatically collected network trace")
+![](doc/firebase_perf_console_trace.png "Firebase Performance Console with a automatically collected network trace")
 
 ## Background
 
