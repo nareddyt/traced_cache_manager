@@ -14,7 +14,7 @@ dependencies:
 
   http: ^0.13.4
   flutter_cache_manager: ^3.3.0
-  firebase_performance: ^0.8.0+2
+  firebase_performance: ^0.8.0+3
 
 dev_dependencies:
   flutter_test:
