@@ -55,10 +55,14 @@ class TracedCacheManager extends CacheManager with ImageCacheManager {
         await for (var response
             in super.webHelper.downloadFile(url, key: key, authHeaders: headers)) {
           if (response is DownloadProgress && withProgress) {
+            metric.responsePayloadSize = response.totalSize;
+            metric.httpResponseCode = 200;
             streamController.add(response);
           }
           if (response is FileInfo) {
             streamController.add(response);
+            metric.httpResponseCode = 200;
+            metric.requestPayloadSize = response.file.lengthSync();
           }
         }
       } catch (e) {
@@ -85,7 +89,9 @@ class TracedCacheManager extends CacheManager with ImageCacheManager {
     await metric.start();
 
     try {
-      return super.downloadFile(url, key: key, authHeaders: authHeaders, force: force);
+      final result = super.downloadFile(url, key: key, authHeaders: authHeaders, force: force);
+      metric.httpResponseCode = 200;
+      return result;
     } finally {
       metric.stop();
     }
