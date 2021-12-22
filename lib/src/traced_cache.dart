@@ -62,7 +62,7 @@ class TracedCacheManager extends CacheManager with ImageCacheManager {
           if (response is FileInfo) {
             streamController.add(response);
             metric.httpResponseCode = 200;
-            metric.requestPayloadSize = response.file.lengthSync();
+            metric.responsePayloadSize = response.file.lengthSync();
           }
         }
       } catch (e) {
