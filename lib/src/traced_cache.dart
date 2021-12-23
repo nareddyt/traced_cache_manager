@@ -1,30 +1,99 @@
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
-import 'package:traced_cache_manager/src/traced_file_service.dart';
+import 'dart:async';
 
-/// The [TracedCacheManager] provides a default implementation of a [BaseCacheManager]
+import 'package:firebase_performance/firebase_performance.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:http/http.dart';
+
+/// The [TracedCacheManager] provides a default implementation of [CacheManager]
 /// that automatically traces network calls and publishes the traces to Firebase
 /// Performance Monitoring.
-class TracedCacheManager extends BaseCacheManager {
+class TracedCacheManager extends CacheManager with ImageCacheManager {
   // Note this uses a different key than the [DefaultCacheManager],
   // forcing data to be re-downloaded on the first use.
-  static const _key = 'libTracedCachedImageData';
+  static const _key = 'TracedCacheManager';
 
   // The singleton instance.
-  static TracedCacheManager _instance;
+  static TracedCacheManager? _instance;
 
   /// Returns the singleton instance of the [TracedCacheManager].
   factory TracedCacheManager() {
     _instance ??= TracedCacheManager._();
-    return _instance;
+    return _instance!;
   }
 
-  TracedCacheManager._() : super(_key, fileService: TracedHttpFileService());
+  TracedCacheManager._() : super(Config(_key));
 
   @override
-  Future<String> getFilePath() async {
-    var directory = await getTemporaryDirectory();
-    return p.join(directory.path, _key);
+  Stream<FileResponse> getFileStream(String url,
+      {String? key, Map<String, String>? headers, bool withProgress = false}) {
+    key ??= url;
+    final streamController = StreamController<FileResponse>();
+    _pushFileToStream(streamController, url, key, headers, withProgress);
+    return streamController.stream;
+  }
+
+  Future<void> _pushFileToStream(StreamController streamController, String url, String? key,
+      Map<String, String>? headers, bool withProgress) async {
+    key ??= url;
+    FileInfo? cacheFile;
+    try {
+      cacheFile = await getFileFromCache(key);
+      if (cacheFile != null) {
+        streamController.add(cacheFile);
+        withProgress = false;
+      }
+    } catch (e) {
+      print('TracedCacheManager: Failed to load cached file for $url with error:\n$e');
+    }
+    if (cacheFile == null || cacheFile.validTill.isBefore(DateTime.now())) {
+      final Request req = Request('GET', Uri.parse(url));
+      req.headers.addAll(headers ?? {});
+      final HttpMetric metric =
+          FirebasePerformance.instance.newHttpMetric(req.url.toString(), HttpMethod.Get);
+      await metric.start();
+      try {
+        await for (var response
+            in super.webHelper.downloadFile(url, key: key, authHeaders: headers)) {
+          if (response is DownloadProgress && withProgress) {
+            metric.responsePayloadSize = response.totalSize;
+            metric.httpResponseCode = 200;
+            streamController.add(response);
+          }
+          if (response is FileInfo) {
+            streamController.add(response);
+            metric.httpResponseCode = 200;
+            metric.responsePayloadSize = response.file.lengthSync();
+          }
+        }
+      } catch (e) {
+        assert(() {
+          print('TracedCacheManager: Failed to download file from $url with error:\n$e');
+          return true;
+        }());
+        if (cacheFile == null && streamController.hasListener) {
+          streamController.addError(e);
+        }
+      } finally {
+        metric.stop();
+      }
+    }
+    unawaited(streamController.close());
+  }
+
+  Future<FileInfo> downloadFile(String url,
+      {String? key, Map<String, String>? authHeaders, bool force = false}) async {
+    final Request req = Request('GET', Uri.parse(url));
+    req.headers.addAll(authHeaders ?? {});
+    final HttpMetric metric =
+        FirebasePerformance.instance.newHttpMetric(req.url.toString(), HttpMethod.Get);
+    await metric.start();
+
+    try {
+      final result = super.downloadFile(url, key: key, authHeaders: authHeaders, force: force);
+      metric.httpResponseCode = 200;
+      return result;
+    } finally {
+      metric.stop();
+    }
   }
 }

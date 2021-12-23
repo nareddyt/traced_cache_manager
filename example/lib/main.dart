@@ -23,10 +23,10 @@ class MyApp extends StatelessWidget {
 }
 
 /// Example usage #3 from the README.
-class MyCustomCacheManager extends BaseCacheManager {
+class MyCustomCacheManager extends CacheManager {
   static const key = 'libMyCustomCachedImageData';
 
-  MyCustomCacheManager() : super(key, fileService: TracedHttpFileService());
+  MyCustomCacheManager() : super(Config(key));
 
   @override
   Future<String> getFilePath() {
